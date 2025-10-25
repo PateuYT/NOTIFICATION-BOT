@@ -70,3 +70,4 @@ async def on_ready():
     check_new_video.start()
 
 bot.run(DISCORD_TOKEN)
+
