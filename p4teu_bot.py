@@ -3,25 +3,70 @@ from discord.ext import tasks, commands
 import requests
 import os
 
-# variabile de mediu
+# Variabile de mediu (setează-le în Railway → Variables)
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 YOUTUBE_CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID"))
 
-# intents corect configurate
+# Intents corect configurate
 intents = discord.Intents.default()
-intents.message_content = True
+intents.message_content = True  # necesar pentru a citi comenzi
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Comandă de test
-@bot.command()
-async def test(ctx):
-    await ctx.send("@everyone 🎬 **P4TEU** a postat un videoclip nou pe YouTube!\n👉 **Titlul Test**\n📺 Uită-te aici: https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+# Ultimul videoclip postat
+last_video_id = None
 
+# Funcție care ia cel mai nou videoclip de pe YouTube
+def get_latest_video():
+    url = (
+        f"https://www.googleapis.com/youtube/v3/search?key={YOUTUBE_API_KEY}"
+        f"&channelId={YOUTUBE_CHANNEL_ID}&part=snippet,id&order=date&maxResults=1"
+    )
+    response = requests.get(url).json()
+    items = response.get("items", [])
+    if not items:
+        return None
+    video = items[0]
+    video_id = video["id"].get("videoId")
+    title = video["snippet"]["title"]
+    link = f"https://www.youtube.com/watch?v={video_id}"
+    return video_id, title, link
+
+# Task care verifică la fiecare 5 minute pentru videoclipuri noi
+@tasks.loop(minutes=5)
+async def check_new_video():
+    global last_video_id
+    latest = get_latest_video()
+    if latest is None:
+        return
+
+    video_id, title, link = latest
+    if last_video_id != video_id:
+        last_video_id = video_id
+        channel = bot.get_channel(DISCORD_CHANNEL_ID)
+        if channel:
+            await channel.send(
+                f"@everyone 🎬 **P4TEU** a postat un videoclip nou pe YouTube!\n"
+                f"👉 **{title}**\n"
+                f"📺 Uită-te aici: {link}"
+            )
+
+# Când botul pornește
 @bot.event
 async def on_ready():
     print(f"✅ Botul s-a conectat ca {bot.user}")
+    
+    # Trimite mesaj de test la pornire
+    channel = bot.get_channel(DISCORD_CHANNEL_ID)
+    if channel:
+        await channel.send(
+            "@everyone 🎬 **P4TEU** a postat un videoclip nou pe YouTube!\n"
+            "👉 **Titlul Test**\n"
+            "📺 https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        )
+
+    check_new_video.start()
 
 bot.run(DISCORD_TOKEN)
