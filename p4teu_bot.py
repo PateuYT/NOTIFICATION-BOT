@@ -9,9 +9,8 @@ YOUTUBE_CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID"))
 
-# Intents corect configurate
+# Intents simple (fără message_content)
 intents = discord.Intents.default()
-intents.message_content = True  # necesar pentru a citi comenzi
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -57,17 +56,6 @@ async def check_new_video():
 @bot.event
 async def on_ready():
     print(f"✅ Botul s-a conectat ca {bot.user}")
-    
-    # Trimite mesaj de test la pornire
-    channel = bot.get_channel(DISCORD_CHANNEL_ID)
-    if channel:
-        await channel.send(
-            "@everyone 🎬 **P4TEU** a postat un videoclip nou pe YouTube!\n"
-            "👉 **Titlul Test**\n"
-            "📺 https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-        )
-
-    check_new_video.start()
+    check_new_video.start()  # pornește verificarea automată
 
 bot.run(DISCORD_TOKEN)
-
