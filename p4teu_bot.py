@@ -11,7 +11,11 @@ DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID"))
 
 # Setări bot
 intents = discord.Intents.default()
-bot = commands.Bot(command_prefix="!", intents=intents)
+
+# Comandă de test
+@bot.command()
+async def test(ctx):
+    await ctx.send("@everyone 🎬 **P4TEU** a postat un videoclip nou pe YouTube!\n👉 **Titlul Test**\n📺 Uită-te aici: https://www.youtube.com/watch?v=dQw4w9WgXcQ")
 
 # Ultimul videoclip postat
 last_video_id = None
@@ -59,3 +63,4 @@ async def on_ready():
 
 # Pornim botul
 bot.run(DISCORD_TOKEN)
+
