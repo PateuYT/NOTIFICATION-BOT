@@ -11,6 +11,7 @@ DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID"))
 
 # Setări bot
 intents = discord.Intents.default()
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Comandă de test
 @bot.command()
@@ -63,4 +64,5 @@ async def on_ready():
 
 # Pornim botul
 bot.run(DISCORD_TOKEN)
+
 
