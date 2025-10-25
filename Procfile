@@ -1,0 +1,1 @@
+worker: python p4teu_bot.py
